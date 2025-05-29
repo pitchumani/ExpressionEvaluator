@@ -14,8 +14,9 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+    - name: Install gtest
+      run: sudo apt-get install libgtest-dev
     - uses: actions/checkout@v4
     - name: build project
       working-directory: cpp
-      run: make
-
+      run: make && make unittest
