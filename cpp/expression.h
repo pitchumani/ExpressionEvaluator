@@ -2,6 +2,7 @@
 #define EXPRESSION_H_
 
 #include<string>
+#include<iostream>
 
 // Expression interface
 class IExpression {
@@ -10,6 +11,7 @@ public:
     virtual bool evaluate() = 0;
     virtual int getValue() = 0;
     virtual std::string getTypeName() = 0;
+    virtual void print(std::ostream &os) const = 0;
     template<typename T> T to() { return dynamic_cast<T>(this); }
 };
 
@@ -35,6 +37,10 @@ public:
     int getValue() override {
         return root->getValue();
     }
+    void print(std::ostream &os) const override {
+        os << "RootNode: ";
+        root->print(os);
+    }
 };
 
 class NumberNode : public IExpression {
@@ -44,17 +50,19 @@ public:
     bool evaluate() override;
     int getValue() override;
     std::string getTypeName() override { return std::string("NumberNode"); }
+    void print(std::ostream &os) const override {
+        os << val;
+    }
 };
 
 class BinaryNode : public IExpression {
 protected:
     Operator op;
-    std::unique_ptr<IExpression> left;
-    std::unique_ptr<IExpression> right;
+    IExpression *left;
+    IExpression *right;
 public:
-    BinaryNode(Operator op, std::unique_ptr<IExpression> left,
-            std::unique_ptr<IExpression> right) :
-        op(op), left(std::move(left)), right(std::move(right)) {}
+    BinaryNode(Operator op, IExpression *left, IExpression *right) :
+        op(op), left(left), right(right) {}
     bool evaluate() override;
     int getValue() override;
     std::string getTypeName() override { return std::string("BinaryNode"); }
@@ -65,17 +73,34 @@ public:
         else if (op == '/') return Operator::DIV;
         throw std::runtime_error("Unknown operator");
     }
+    void print(std::ostream &os) const override {
+        os << "(";
+        left->print(os);
+        os << " " << opToChar(op) << " ";
+        right->print(os);
+        os << ")";
+    }
+private:
+    static char opToChar(Operator op) {
+        switch (op) {
+            case Operator::ADD: return '+';
+            case Operator::SUB: return '-';
+            case Operator::MUL: return '*';
+            case Operator::DIV: return '/';
+            default: return '?';  // Unknown operator
+        }
+    }
 };
 
 class ExpressionFactory {
 public:
-    static std::unique_ptr<IExpression> createNumber(int value) {
-        return std::make_unique<NumberNode>(value);
+    static IExpression* createNumber(int value) {
+        return new NumberNode(value);
     }
-    static std::unique_ptr<BinaryNode> createBinary(Operator op,
-            std::unique_ptr<IExpression> left,
-            std::unique_ptr<IExpression> right) {
-        return std::make_unique<BinaryNode>(op, std::move(left), std::move(right));
+    static IExpression* createBinary(Operator op,
+            IExpression* left,
+            IExpression* right) {
+        return new BinaryNode(op, left, right);
     }
 };
 
