@@ -1,0 +1,21 @@
+name: C/C++ CI
+
+on:
+  push:
+    branches: [ "main" ]
+    paths:
+      - cpp/**
+  pull_request:
+    branches: [ "main" ]
+    paths:
+      - cpp/**
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: build project
+      working-directory: cpp
+      run: make
+
