@@ -1,6 +1,8 @@
 #include<iostream>
 #include<string>
 
+#include "parser.h"
+
 using namespace std;
 
 int main(int argc, char *argv[]) {
@@ -25,12 +27,25 @@ int main(int argc, char *argv[]) {
     cout << "Expression Evaluator\n";
     cout << ">> Type quit to exit.\n";
 
+    Parser parser;
+
     string input;
     while(true) {
         cout << ">> ";
-        cin >> input;
+        std::getline(cin, input);
+        if (input.empty()) continue;
+
         if ((input.size() == 4) && (input == "quit"))
             break;
+        IExpression *expr = parser.parse(input);
+        if (!expr) {
+            cout << "Error in parsing the input.\n";
+        }
+        if (!expr->evaluate()) {
+            cout << "Error in evaluating expression!\n";
+        } else {
+            cout << ">> = " << expr->getValue() << endl;
+        }
     }
     return 0;
 }
