@@ -70,10 +70,10 @@ Token Tokenizer::next() {
         return parseParentheses();
     } else if (std::isalpha(input[position])) {
         // TODO: Handle identifiers or keywords if needed
-        parseString();
+        auto id = parseString();
         // For now, treat identifiers as NUM for simplicity
-        cerr << "Identifiers are not supported yet. Treating it as number.\n";
-        return Token("0", Token::Type::NUM);
+        //cerr << "Identifiers are not supported yet: " << id.value << "\n";
+        return Token(id.value, Token::Type::ID);
     } else {
         cerr << "Invalid character '" << input[position] << "' at position " << position << "\n";
         advance(); // Skip invalid character
@@ -102,28 +102,37 @@ IExpression *Parser::parseNumber(const Token &token) {
         return nullptr;
     }
 }
+
 IExpression *Parser::parseParentheses() {
     if (currentToken.type != Token::Type::LPAREN) {
         cerr << "Expected '(', but found '" << currentToken.value << "'\n";
         return nullptr;
     }
     advance(); // Skip the '('
+
     auto expr = parseExpression(0); // Parse the expression inside parentheses
     if (!expr) {
         return nullptr; // Error already reported in parseExpression
     }
+
     if (currentToken.type != Token::Type::RPAREN) {
         cerr << "Expected ')', but found '" << currentToken.value << "'\n";
         return nullptr;
     }
-    advance(); // Skip the ')'
     return expr;
 }
+
 IExpression *Parser::parsePrimary() {
+    //cout << "Parsing primary expression: " << endl;
+    //cout << "Current token: " << currentToken.value << endl;    
     if (currentToken.type == Token::Type::NUM) {
         return parseNumber(currentToken);
     } else if (currentToken.type == Token::Type::LPAREN) {
         return parseParentheses();
+    } else if (currentToken.type == Token::Type::ID) {
+        cerr << "Identifiers are not supported yet: " << currentToken.value << "\n";
+        advance(); // Skip the identifier
+        return nullptr; // Return nullptr for unsupported identifiers
     } else if (currentToken.type == Token::Type::END) {
         return nullptr; // No more tokens to parse
     } else {
@@ -137,7 +146,6 @@ void Parser::advance() {
         currentToken = tokenizer->next();
     } else {
         currentToken = Token("", Token::Type::END); // Set to END if no more tokens
-        cerr << "No more tokens available.\n";
     }
 }
 
@@ -151,36 +159,34 @@ IExpression *Parser::parseOperator(const Token &opToken, IExpression *left, IExp
 }
 
 IExpression *Parser::parseExpression(int precedence) {
-    if (!tokenizer->hasNext()) {
-        cerr << "No tokens available to parse.\n";
-        return nullptr;
-    }
-    currentToken = tokenizer->next();
+    //cout << "Parsing expression with precedence: " << precedence << endl;
     auto left = parsePrimary();
-    if (!left) {
-        return nullptr; // Error already reported in parsePrimary
-    }
-    while (tokenizer->hasNext()) {
-        auto opToken = tokenizer->peek(); // peek, don't consume the token
-        int currentPrecedence = getPrecedence(opToken);
-        if (currentPrecedence < precedence) {
-            break; // Stop if the operator has lower precedence
+    if (!left) return nullptr;
+
+    // fetch the next token
+    advance();
+    while (true) {
+        int currentPrecedence = getPrecedence(currentToken);
+        if (currentPrecedence <= 0 || currentPrecedence < precedence) {
+            break;
         }
-        if (opToken.type == Token::Type::RPAREN || opToken.type == Token::Type::END) {
-            break; // End of expression
-        }
-        tokenizer->advance(); // Consume the operator token
-        auto right = parseExpression(currentPrecedence + 1);
+
+        Token opToken = currentToken;
+        advance(); // consume operator
+
+        auto right = parseExpression(currentPrecedence); // use same precedence for left-associativity
         if (!right) {
             cerr << "Error parsing right operand after operator '" << opToken.value << "'.\n";
-            return nullptr; // Error already reported in parseExpression
+            return nullptr;
         }
+
         left = parseOperator(opToken, left, right);
         if (!left) {
             cerr << "Error creating binary expression for operator '" << opToken.value << "'.\n";
-            return nullptr; // Error already reported in parseOperator
+            return nullptr;
         }
     }
+
     return left;
 }
 
@@ -190,79 +196,13 @@ IExpression *Parser::parse(std::string input) {
         return nullptr;
     }
     tokenizer = new Tokenizer(std::move(input));
-    // currentToken = tokenizer->next();
+    advance(); // Initialize the first token
+    //cout << "first token: " << currentToken.value << endl;
     auto res = parseExpression(0);
     if (res) {
-        cout << endl;
         res->print(cout);
         cout << endl;
     }
     delete tokenizer;
     return res;
 }
-
-#if 0
-    cout << "Found " << lexicalTokens.size() << " tokens!\n";
-    stack<IExpression*> optrStack;
-    for (size_t idx = 0; idx < lexicalTokens.size(); ++idx) {
-        auto token = lexicalTokens[idx];
-        switch (token.type) {
-            case Token::Type::NUM:
-            {
-                // Create a NumberNode and push it onto the stack
-                auto exprNum = parseNumber(token);
-                if (exprNum) {
-                    optrStack.push(exprNum);
-                } else {
-                    // Error already reported in parseNumber
-                }
-            }
-            break;
-            case Token::Type::LPAREN:
-            {
-                auto exprParen = parseParentheses(tokens, idx);
-                if (exprParen) {
-                    optrStack.push(exprParen);
-                } else {
-                    // Error already reported in parseParentheses
-                }
-            }
-            break;
-            case Token::Type::PLUS:
-            case Token::Type::MINUS:
-            case Token::Type::MUL:
-            case Token::Type::DIV:
-            {
-                if (optrStack.empty()) {
-                    cerr << "Invalid operator '" << token.value << "' at index "
-                         << idx << ". No left operand available.\n";
-                    continue;
-                }
-                auto right = std::move(optrStack.top());
-                optrStack.pop();
-                auto left = parsePrimary(tokens, idx);
-                if (!left) {
-                    // Error already reported in parsePrimary
-                    continue;
-                }
-                auto exprBop = parseOperator(token, left, right);
-                if (optrStack.empty()) {
-                    cerr << "Invalid expression after operator '" << token.value << "'.\n";
-                    continue;
-                }
-                optrStack.push(std::move(exprBop));
-            }
-            break;
-            default:
-                cerr << "Unhandled token: " << token.value << " !!\n";
-                break;
-        }
-    }
-    // If we have any remaining operators, we should have a valid expression
-    if (optrStack.empty()) {
-        cerr << "No valid expression found after parsing all tokens.\n";
-        return nullptr;
-    }
-    // If we have a valid expression, return it
-    return finalizeExpression(optrStack, tokens);
-#endif

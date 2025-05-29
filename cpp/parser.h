@@ -49,7 +49,7 @@ class Parser {
     void advance();
 public:
     Parser() {
-        currentToken = Token("", Token::Type::NUM);
+        currentToken = Token("", Token::Type::END);
     }
 
     IExpression *parse(std::string input);

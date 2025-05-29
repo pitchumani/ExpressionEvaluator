@@ -1,13 +1,25 @@
 .DEFAULT_GOAL := all
+.PHONY: all test runtest clean
+
+# Makefile for evaluating expressions and running tests using Google Test
+# Ensure you have Google Test installed and the paths are set correctly
 
 CXX=clang++
 COMPILE_FLAGS=$(CXXFLAGS) -g3 -std=c++17
-GTEST_FLAGS=-lgtest
 
+BUILDDIR := build
 
-all: main.cpp expression.cpp parser.cpp
-	$(CXX) $^ $(COMPILE_FLAGS) -o eval
+all: $(BUILDDIR)/eval
+
+$(BUILDDIR)/eval: main.cpp expression.cpp parser.cpp | $(BUILDDIR)
+	$(CXX) $(COMPILE_FLAGS) $^ -o $(BUILDDIR)/eval
+
+unittest:
+	$(MAKE) -C ./googletest test
+
+$(BUILDDIR):
+	mkdir -p $(BUILDDIR)
 
 clean:
-	rm eval
-
+	$(MAKE) -C ./googletest clean
+	rm -rf $(BUILDDIR)

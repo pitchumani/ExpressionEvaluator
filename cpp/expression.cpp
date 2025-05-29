@@ -5,7 +5,7 @@ bool NumberNode::evaluate() {
     return true;
 }
 
-int NumberNode::getValue() {
+int64_t NumberNode::getValue() {
     return val;
 }
 
@@ -14,7 +14,7 @@ bool BinaryNode::evaluate() {
     return left->evaluate() && right->evaluate();
 }
 
-int BinaryNode::getValue() {
+int64_t BinaryNode::getValue() {
     switch (op) {
     case Operator::ADD: return left->getValue() + right->getValue();
     case Operator::SUB: return left->getValue() - right->getValue();

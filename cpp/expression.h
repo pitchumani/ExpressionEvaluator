@@ -9,7 +9,7 @@ class IExpression {
 public:
     virtual ~IExpression() = default;
     virtual bool evaluate() = 0;
-    virtual int getValue() = 0;
+    virtual int64_t getValue() = 0;
     virtual std::string getTypeName() = 0;
     virtual void print(std::ostream &os) const = 0;
     template<typename T> T to() { return dynamic_cast<T>(this); }
@@ -34,7 +34,7 @@ public:
     bool evaluate() override {
         return root->evaluate();
     }
-    int getValue() override {
+    int64_t getValue() override {
         return root->getValue();
     }
     void print(std::ostream &os) const override {
@@ -48,7 +48,7 @@ class NumberNode : public IExpression {
 public:
     explicit NumberNode(int val) : val(val) {}
     bool evaluate() override;
-    int getValue() override;
+    int64_t getValue() override;
     std::string getTypeName() override { return std::string("NumberNode"); }
     void print(std::ostream &os) const override {
         os << val;
@@ -64,7 +64,7 @@ public:
     BinaryNode(Operator op, IExpression *left, IExpression *right) :
         op(op), left(left), right(right) {}
     bool evaluate() override;
-    int getValue() override;
+    int64_t getValue() override;
     std::string getTypeName() override { return std::string("BinaryNode"); }
     static Operator get(char op) {
         if (op == '+') return Operator::ADD;
@@ -76,7 +76,7 @@ public:
     void print(std::ostream &os) const override {
         os << "(";
         left->print(os);
-        os << " " << opToChar(op) << " ";
+        os << opToChar(op);
         right->print(os);
         os << ")";
     }
