@@ -19,5 +19,4 @@ jobs:
     - uses: actions/checkout@v4
     - name: build project
       working-directory: cpp
-      run: make
-      run: make unittest
+      run: make && make unittest
