@@ -12,17 +12,47 @@ using namespace std;
 
 struct Token {
     string value;
-    enum class Type { NUM, OPR, FOPR, BOPEN, BCLOSE };
+    enum class Type { NUM, PLUS, MINUS, MUL, DIV, LPAREN, RPAREN, ID,END };
     Type type;
+    Token() : value(""), type(Type::NUM) {}
     Token(string s, Type t) : value(s), type(t) {}
 };
 
-class Parser {
-    vector<Token> tokenize(string input);
-
+class Tokenizer {
+    string input;
+    size_t position = 0;
 public:
-    Parser() {}
-    IExpression *parse(string input);
+    Tokenizer(string input) : input(std::move(input)) {}
+    Token next();
+    Token peek();
+    bool hasNext() const {
+        return !input.empty();
+    }
+    void advance(size_t count = 1);
+private:
+    void skipWhitespace();
+    Token parseNumber();
+    Token parseOperator();
+    Token parseParentheses();
+    Token parseString();
+};
+
+class Parser {
+    Tokenizer *tokenizer;
+    Token currentToken;
+    int getPrecedence(const Token &token);
+    IExpression *parseExpression(int precedence = 0);
+    IExpression *parsePrimary();
+    IExpression *parseParentheses();
+    IExpression *parseNumber(const Token &token);
+    IExpression *parseOperator(const Token &opToken, IExpression *left, IExpression *right);
+    void advance();
+public:
+    Parser() {
+        currentToken = Token("", Token::Type::NUM);
+    }
+
+    IExpression *parse(std::string input);
 };
 
 #endif  //  PARSER_H_

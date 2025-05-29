@@ -40,8 +40,7 @@ int main(int argc, char *argv[]) {
         IExpression *expr = parser.parse(input);
         if (!expr) {
             cout << "Error in parsing the input.\n";
-        }
-        if (!expr->evaluate()) {
+        } else if (!expr->evaluate()) {
             cout << "Error in evaluating expression!\n";
         } else {
             cout << ">> = " << expr->getValue() << endl;
