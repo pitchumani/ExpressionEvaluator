@@ -1,5 +1,18 @@
 #include "expression.h"
 
+bool RootNode::evaluate() {
+    return root->evaluate();
+}
+
+int64_t RootNode::getValue() {
+    return root->getValue();
+}
+
+void RootNode::print(std::ostream &os) const {
+    os << "RootNode: ";
+    root->print(os);
+}
+
 bool NumberNode::evaluate() {
     // do nothing
     return true;
@@ -7,6 +20,10 @@ bool NumberNode::evaluate() {
 
 int64_t NumberNode::getValue() {
     return val;
+}
+
+void NumberNode::print(std::ostream &os) const {
+    os << val;
 }
 
 bool BinaryNode::evaluate() {
@@ -30,5 +47,13 @@ int64_t BinaryNode::getValue() {
     default:
         throw std::runtime_error("Unknown operator");
     }
+}
+
+void BinaryNode::print(std::ostream &os) const {
+    os << "(";
+    left->print(os);
+    os << opToChar(op);
+    right->print(os);
+    os << ")";
 }
 

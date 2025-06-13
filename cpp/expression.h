@@ -31,16 +31,9 @@ class RootNode : public IExpression {
 
 public:
     RootNode(IExpression *expr) : root(expr) {}
-    bool evaluate() override {
-        return root->evaluate();
-    }
-    int64_t getValue() override {
-        return root->getValue();
-    }
-    void print(std::ostream &os) const override {
-        os << "RootNode: ";
-        root->print(os);
-    }
+    bool evaluate() override;
+    int64_t getValue() override;
+    void print(std::ostream &os) const override;
 };
 
 class NumberNode : public IExpression {
@@ -50,9 +43,7 @@ public:
     bool evaluate() override;
     int64_t getValue() override;
     std::string getTypeName() override { return std::string("NumberNode"); }
-    void print(std::ostream &os) const override {
-        os << val;
-    }
+    void print(std::ostream &os) const override;
 };
 
 class BinaryNode : public IExpression {
@@ -73,13 +64,7 @@ public:
         else if (op == '/') return Operator::DIV;
         throw std::runtime_error("Unknown operator");
     }
-    void print(std::ostream &os) const override {
-        os << "(";
-        left->print(os);
-        os << opToChar(op);
-        right->print(os);
-        os << ")";
-    }
+    void print(std::ostream &os) const override;
 private:
     static char opToChar(Operator op) {
         switch (op) {
