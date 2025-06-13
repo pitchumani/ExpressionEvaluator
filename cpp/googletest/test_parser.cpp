@@ -88,3 +88,32 @@ TEST(ParserTest, EmptyInput) {
     IExpression* expr = parser.parse("");
     EXPECT_EQ(expr, nullptr);
 }
+
+TEST(ParserTest, ParserTest_LeftAsso_Test) {
+    Parser parser;
+    IExpression *expr = parser.parse("1-2+3");
+    ASSERT_NE(expr, nullptr);
+    EXPECT_EQ(printExpression(expr), "((1-2)+3)");
+    EXPECT_EQ(expr->evaluate(), true);
+    EXPECT_EQ(expr->getValue(), 2);
+    delete expr;
+}
+
+TEST(ParserTest, ParserTest_RightAsso_Test) {
+    Parser parser;
+    IExpression *expr = parser.parse("1-2+3*4");
+    ASSERT_NE(expr, nullptr);
+    EXPECT_EQ(printExpression(expr), "((1-2)+(3*4))");
+    EXPECT_EQ(expr->evaluate(), true);
+    EXPECT_EQ(expr->getValue(), 11);
+    delete expr;
+}
+TEST(ParserTest, ParserTest_ComplexExpression_Test) {
+    Parser parser;
+    IExpression *expr = parser.parse("1+2*3-4/2");
+    ASSERT_NE(expr, nullptr);
+    EXPECT_EQ(printExpression(expr), "((1+(2*3))-(4/2))");
+    EXPECT_EQ(expr->evaluate(), true);
+    EXPECT_EQ(expr->getValue(), 5);
+    delete expr;
+}

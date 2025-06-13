@@ -159,7 +159,6 @@ IExpression *Parser::parseOperator(const Token &opToken, IExpression *left, IExp
 }
 
 IExpression *Parser::parseExpression(int precedence) {
-    //cout << "Parsing expression with precedence: " << precedence << endl;
     auto left = parsePrimary();
     if (!left) return nullptr;
 
@@ -167,14 +166,16 @@ IExpression *Parser::parseExpression(int precedence) {
     advance();
     while (true) {
         int currentPrecedence = getPrecedence(currentToken);
-        if (currentPrecedence <= 0 || currentPrecedence < precedence) {
+        // if the current token is of lower or equal precedence, we stop parsing
+        // evaluate left-associativity by using the same precedence for the right operand
+        if (currentPrecedence <= 0 || currentPrecedence <= precedence) {
             break;
         }
 
         Token opToken = currentToken;
         advance(); // consume operator
 
-        auto right = parseExpression(currentPrecedence); // use same precedence for left-associativity
+        auto right = parseExpression(currentPrecedence);
         if (!right) {
             cerr << "Error parsing right operand after operator '" << opToken.value << "'.\n";
             return nullptr;
