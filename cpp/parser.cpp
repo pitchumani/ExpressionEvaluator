@@ -200,10 +200,12 @@ IExpression *Parser::parse(std::string input) {
     advance(); // Initialize the first token
     //cout << "first token: " << currentToken.value << endl;
     auto res = parseExpression(0);
+    /*
     if (res) {
         res->print(cout);
         cout << endl;
     }
+    */
     delete tokenizer;
     return res;
 }
