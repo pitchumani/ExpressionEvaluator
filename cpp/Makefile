@@ -7,14 +7,18 @@
 CXX=clang++
 COMPILE_FLAGS=$(CXXFLAGS) -g3 -std=c++17
 
+SRCS := main.cpp expression.cpp parser.cpp
+HDRS := expression.h parser.h
+
 BUILDDIR := build
+TARGET := $(BUILDDIR)/eval
 
-all: $(BUILDDIR)/eval
+all: $(TARGET)
 
-$(BUILDDIR)/eval: main.cpp expression.cpp parser.cpp | $(BUILDDIR)
-	$(CXX) $(COMPILE_FLAGS) $^ -o $(BUILDDIR)/eval
+$(TARGET): $(SRCS) $(HDRS) | $(BUILDDIR)
+	$(CXX) $(COMPILE_FLAGS) $(SRCS) -o $@
 
-unittest:
+unittest: $(BUILDDIR)
 	$(MAKE) -C ./googletest test
 
 $(BUILDDIR):

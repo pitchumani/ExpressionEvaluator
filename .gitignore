@@ -1,0 +1,5 @@
+# build directory and object files
+cpp/build/*
+cpp/googletest/*.o
+*.o
+
