@@ -7,8 +7,8 @@
 CXX=clang++
 COMPILE_FLAGS=$(CXXFLAGS) -g3 -std=c++17
 
-SRCS := main.cpp expression.cpp parser.cpp
-HDRS := expression.h parser.h
+SRCS := main.cpp expression.cpp parser.cpp ast.cpp
+HDRS := expression.h parser.h visitor.h ast.h
 
 BUILDDIR := build
 TARGET := $(BUILDDIR)/eval

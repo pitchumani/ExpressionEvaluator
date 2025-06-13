@@ -2,6 +2,7 @@
 #include<string>
 
 #include "parser.h"
+#include "ast.h"
 
 using namespace std;
 
@@ -44,6 +45,8 @@ int main(int argc, char *argv[]) {
             cout << "Error in evaluating expression!\n";
         } else {
             cout << ">> = " << expr->getValue() << endl;
+            ASTPrinter aprinter(cout);
+            aprinter.print(expr);
         }
     }
     return 0;
