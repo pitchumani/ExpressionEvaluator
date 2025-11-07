@@ -1,5 +1,5 @@
 CXX = clang++
-CXXFLAGS = -std=c++17 -I.. -I./ -Wall -Wextra -pthread
+CXXFLAGS = -std=c++17 -I.. -I./ -Wall -Wextra -pthread -fsanitize=address
 
 # List all test source files and main library sources
 SRCS = main.cpp test_expression.cpp test_parser.cpp ../expression.cpp ../parser.cpp
